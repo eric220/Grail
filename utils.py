@@ -3,7 +3,7 @@ import numpy as np
 import random
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-#takes in original dataframe and number, returns n(num) new df of random scaled, and random categorical 
+#takes in original dataframe and number, creates appropriate random vars, returns n(num) new df of random to scale
 def get_permutations(df, num):
     t_lists = []
     for r in range(0,num):
@@ -25,7 +25,7 @@ def get_permutations(df, num):
     permutations_df = pd.get_dummies(permutations_df, columns=['Input1', 'Input2', 'Input3'])
     return permutations_df
 
-#gets log_Target, dummy 1-3, 
+#input raw data, gets log_Target, dummy 1-3, scales continuous vars, returns df, scaler, and column names
 def xform_data(t_df, standard_scale = False):
     if standard_scale == True:
         scaler = StandardScaler()
@@ -39,9 +39,10 @@ def xform_data(t_df, standard_scale = False):
     df_dummied[continuous_cols] = scaler.fit_transform(df_dummied[continuous_cols])
     return df_dummied, scaler, continuous_cols
 
+#input copy of permutations, unscales, unlogs Target, renames column, returns df
 def get_experiment_df(t_df, means, scale, cols):
     t_df['log_Target'] = means
     t_df[cols] = scale.inverse_transform(t_df[cols])
     t_df.log_Target = np.exp(t_df.log_Target)
-    t_df.rename(index={'log_Target': "Target"})
+    t_df.rename(columns={'log_Target': "Target"}, inplace = True)
     return t_df
