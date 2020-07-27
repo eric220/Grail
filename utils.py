@@ -38,3 +38,10 @@ def xform_data(t_df, standard_scale = False):
     continuous_cols.append('log_Target')
     df_dummied[continuous_cols] = scaler.fit_transform(df_dummied[continuous_cols])
     return df_dummied, scaler, continuous_cols
+
+def get_experiment_df(t_df, means, scale, cols):
+    t_df['log_Target'] = means
+    t_df[cols] = scale.inverse_transform(t_df[cols])
+    t_df.log_Target = np.exp(t_df.log_Target)
+    t_df.rename(index={'log_Target': "Target"})
+    return t_df
