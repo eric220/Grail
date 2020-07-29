@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import random
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
+import tqdm
 
 #takes in original dataframe and number, creates appropriate random vars, returns n(num) new df of random to scale
 def get_permutations(df, num):
@@ -40,9 +41,28 @@ def xform_data(t_df, standard_scale = False):
     return df_dummied, scaler, continuous_cols
 
 #input copy of permutations, unscales, unlogs Target, renames column, returns df
-def get_experiment_df(t_df, means, scale, cols):
+def get_experiment_df(t_df, means, sigmas, wape, scale, cols):
     t_df['log_Target'] = means
+    t_df['Certainty'] = (100 - (1960 * sigmas))
     t_df[cols] = scale.inverse_transform(t_df[cols])
     t_df.log_Target = np.exp(t_df.log_Target)
     t_df.rename(columns={'log_Target': "Target"}, inplace = True)
     return t_df
+
+def get_preds(data, num):
+    y_pred_list = []
+    for i in tqdm.tqdm(range(len(data))):
+        tensor = tf.constant([data.iloc[i]], dtype='float32')
+        pred_list = []
+        for j in range(num):
+            y_pred = model.predict(tensor)
+            pred_list.append(y_pred)
+        y_pred_list.append(pred_list)
+    return y_pred_list
+
+def means_sigmas(pred_list):
+    y_means = np.mean(y_pred_list, axis = 1)
+    y_sigmas = np.std(y_pred_list, axis = 1)
+    y_sigmas = y_sigmas.reshape(len(y_means),)
+    y_means = y_means.reshape(len(y_sigmas),)
+    return means, sigmas
