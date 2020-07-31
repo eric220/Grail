@@ -3,6 +3,25 @@ import numpy as np
 import random
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import tqdm
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import utils
+import tensorflow as tf
+tfk = tf.keras
+tf.keras.backend.set_floatx("float64")
+import tensorflow_probability as tfp
+tfd = tfp.distributions
+from keras import backend as K
+from keras.callbacks import EarlyStopping
+from keras.layers import Layer
+from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
+from tensorflow.keras.layers import Input
+from tensorflow.keras.models import Model
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.layers import Input, Dense, Flatten, BatchNormalization, Activation, LeakyReLU
+from tensorflow_probability.python.layers import DistributionLambda
+import tqdm
 
 #takes in original dataframe and number, creates appropriate random vars, returns n(num) new df of random to scale
 def get_permutations(df, num):
@@ -49,7 +68,7 @@ def get_experiment_df(t_df, means, sigmas, wape, scale, cols):
     t_df.rename(columns={'log_Target': "Target"}, inplace = True)
     return t_df
 
-def get_preds(data, num):
+def get_preds(model, data, num):
     y_pred_list = []
     for i in tqdm.tqdm(range(len(data))):
         tensor = tf.constant([data.iloc[i]], dtype='float32')
